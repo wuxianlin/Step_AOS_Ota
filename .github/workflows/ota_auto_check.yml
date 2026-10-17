@@ -1,0 +1,37 @@
+name: Ota Auto Check application
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 8 * * *
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.13'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Run and update
+      run: |
+        python3 stepx_ota_auto_check.py
+
+    - name: Commit and push changes
+      run: |
+        git config user.email "noreply@github.com"
+        git config user.name "GitHub Action"
+        git add *.csv
+        if [ -z "$(git status --porcelain)" ]; then
+          echo "No changes to commit"
+        else
+          git commit -m "auto update"
+          git push
+        fi
