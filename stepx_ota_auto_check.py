@@ -126,6 +126,7 @@ def check_group(ref: dict) -> tuple:
         Raises on request failure / unusable reply.
     """
     version = (ref.get("version") or "").strip()
+    digest_sha256 = (ref.get("digest_sha256") or "").strip()
     if not version:
         raise ValueError("version is empty, no baseline to check against")
 
@@ -141,11 +142,12 @@ def check_group(ref: dict) -> tuple:
     response = send_ota_request(config, endpoint, target)
     info = parse_update_response(response)
     latest = (info.version or "").strip()
+    latest_digest_sha256 = (info.digest_sha256 or "").strip()
     if not latest:
         raise ValueError(f"no version in reply (code="
                          f"{response.get('reply', response).get('code')})")
 
-    if latest != version:
+    if latest != version or latest_digest_sha256 != digest_sha256:
         print(f"  [CHANGE] {version}\n           -> {latest}")
         if info.download_url:
             print(f"           url: {info.download_url}")
