@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: 0 8 * * *
 
+permissions:
+  contents: write
+
 jobs:
   build:
 
@@ -22,7 +25,8 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Run and update
       run: |
-        python3 stepx_ota_auto_check.py
+        python3 stepx_ota_auto_check.py || echo "result: $?"
+
 
     - name: Commit and push changes
       run: |
